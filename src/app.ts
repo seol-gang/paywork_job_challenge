@@ -2,30 +2,34 @@ import "reflect-metadata";
 import "dotenv/config";
 import express from "express";
 import * as bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import cors from "cors";
 
-import userRouter from "./routes/User.routes";
+import authRouter from "./routes/auth.routes";
 
-import { createConnection } from "typeorm";
+export class App {
+  private app: express.Application;
 
-createConnection()
-  .then(() => console.log("Database Connected"))
-  .catch((err) => console.log(err));
+  constructor() {
+    this.app = express();
+    this.app.use(bodyParser.json());
+    this.app.use(bodyParser.urlencoded({ extended: true }));
+    this.app.use(cookieParser());
+    this.app.use(morgan("dev"));
+    this.app.use(
+      cors({
+        origin: ["*"],
+        methods: ["GET", "POST", "PUT", "DELETE"],
+        credentials: true,
+      })
+    );
+    this.app.use("/auth", authRouter);
+  }
 
-const app: any = express();
+  public getInstance() {
+    return this.app;
+  }
+}
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(morgan("dev"));
-app.use(
-  cors({
-    origin: ["*"],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
-
-app.use("/user", userRouter);
-
-export default app;
+export default new App();

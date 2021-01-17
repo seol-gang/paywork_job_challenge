@@ -1,10 +1,14 @@
 import {
+  AfterLoad,
+  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
+import * as crypto from "crypto";
+import { encrypt } from "../../common/dataEncrypt";
 
 @Entity()
 export class User {
@@ -12,9 +16,9 @@ export class User {
   USER_SEQ: number;
 
   @Column({
-    length: 15,
+    length: 100,
   })
-  ID: string;
+  EMAIL: string;
 
   @Column({
     length: 255,
@@ -27,11 +31,6 @@ export class User {
   NICKNAME: string;
 
   @Column({
-    length: 100,
-  })
-  EMAIL: string;
-
-  @Column({
     length: 20,
   })
   PHONE: string;
@@ -41,4 +40,9 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @BeforeInsert()
+  encryptPassword() {
+    this.PASSWORD = encrypt(this.PASSWORD);
+  }
 }
